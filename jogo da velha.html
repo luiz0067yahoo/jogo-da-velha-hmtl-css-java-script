@@ -1,0 +1,242 @@
+<html>
+	<style>
+		hmtl,body{
+			margin: 0 0 0 0;
+			padding: 0 0 0 0;
+			width:100%;
+			height:100%;	
+		}
+		.simbolo-x{
+			background-repeat :no-repeat;
+			background-image :url('data:image/svg+xml,<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>');
+			background-position:center center;
+			background-size: auto;
+		}
+		.simbolo-o{
+			background-repeat :no-repeat;
+			background-image :url('data:image/svg+xml,<svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="circle" class="svg-inline--fa fa-circle fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z"></path></svg>');
+			background-position:center center;
+			background-size: auto;
+		}
+		#main{
+			width:100%;
+			min-height:100%;
+			display:flex;
+			background-color:#333333;
+			flex-wrap: wrap;
+		}
+		.linha{
+			align-items: stretch;
+			width:100%!important;
+			display:flex;
+		}
+		.coluna{
+			align-items: stretch;
+			flex: 1 1 100px;
+			text-decoration:none;
+			padding:3px;
+		}
+		.simbolo{
+			width:100%;
+			min-height:100%;	
+		}
+		.Vencedor {
+			background-color:green;
+		}
+		.Vencedor-o .simbolo-x{
+			background-color:red;
+		}
+		.Vencedor-x .simbolo-o{
+			background-color:red;
+		}
+	</style>
+	<body>
+		<div id="main" class=""></div>
+	</body>
+	<script>
+		const o='o';
+		const x='x';
+		const identificacaoDoQuadradadoPrincipal="main";
+		const quantidadeDeLinhasEColunas=3;
+		const simbolos=[o,x];
+		var simboloInicial=o;
+		var simboloAtual=null;
+		var buttoes=[];
+		var prefixoIdentificacaoDoBotao="button-";
+		function criarColuna(){
+			var elemento=document.createElement("div");
+			elemento.className="coluna";
+			return elemento;
+		}
+		function createRow(){
+			var elemento=document.createElement("div");
+			elemento.className="linha";
+			return elemento;
+		}
+		function criarBotao(identificacao){
+			var elemento=document.createElement("button");
+			elemento.className="simbolo";
+			elemento.setAttribute("id",identificacao);
+			elemento.addEventListener("click", escreversimbolo,false);
+			return elemento;
+		}
+		function criarJogo(){
+			for(i=0;i<quantidadeDeLinhasEColunas;i++){
+				var linha=createRow();
+				var lineIdbuttoes=[];
+				for(j=0;j<quantidadeDeLinhasEColunas;j++){
+					var index=i*quantidadeDeLinhasEColunas+j+1;
+					var identificacao=prefixoIdentificacaoDoBotao+index.toString();
+					var coluna=criarColuna();
+					coluna.append(criarBotao(identificacao));
+					linha.append(coluna);
+					lineIdbuttoes.push((identificacao));
+				}
+				buttoes.push(lineIdbuttoes);
+				$(identificacaoDoQuadradadoPrincipal).append(linha);
+				for(j=0;j<quantidadeDeLinhasEColunas;j++){
+					buttoes[i][j]=$(buttoes[i][j]);
+				}
+			}
+		}
+		criarJogo();
+		function $(identificacao){
+			return document.getElementById(identificacao);
+		}
+		function adicionarClasse(identificacao,nomeDaClasse){
+			if(identificacao.className.indexOf(nomeDaClasse)==-1)
+				identificacao.className+=(" "+nomeDaClasse);
+		}
+		function removeClass(elemento,nomeDaClasse){
+			if(elemento.className.indexOf(nomeDaClasse+" ")!=-1)
+				elemento.className.replace(nomeDaClasse+" ","");
+			else if(elemento.className.indexOf(" "+nomeDaClasse)!=-1)
+				elemento.className.replace(" "+nomeDaClasse,"");
+			else if(elemento.className.indexOf(nomeDaClasse)!=-1)
+				elemento.className.replace(nomeDaClasse,"");
+		}
+		function escreversimbolo(evento){
+			var elemento=evento.currentTarget;
+			simboloAtual=(simboloAtual==null)?simboloInicial:simboloAtual;
+			if(temVencedor()==null){
+				if(notsimbolo(elemento)){
+					adicionarClasse(elemento,"simbolo-"+simboloAtual);
+					trocarsimboloAtual();
+					temVencedor();
+				}
+			}
+		}
+		function trocarsimboloAtual(){
+			simboloAtual=(simboloAtual ==o)?x:o;
+		}
+		function temVencedor(){
+			var resultado=null;
+			if(temVencedorsimbolo(o))
+				resultado=o;
+			else if(temVencedorsimbolo(x))
+				resultado=x;
+			return resultado;
+		}
+		function temVencedorsimbolo(simbolo){
+			var resultado = temVencedoLinhas(simbolo) || temVencedorColunas(simbolo) || temVencedorDiagonal(simbolo);
+			if(resultado)
+				adicionarClasse($(identificacaoDoQuadradadoPrincipal),"Vencedor-"+simbolo);
+			return resultado;
+		}
+		function temVencedoLinhas(simbolo){
+			var resultado=false;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(temVencedoLinha(simbolo,i))
+					resultado=true;
+			return resultado;
+		}
+		function temVencedoLinha(simbolo,index){
+			var resultado=temLinha(simbolo,index);
+			if(resultado)
+				for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+					adicionarClasse(buttoes[index][i],"Vencedor");
+			return resultado;
+		}
+		function temLinha(simbolo,index){
+			var resultado=true;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(!temsimbolo(buttoes[index][i],simbolo))
+					resultado=false;
+			return resultado;
+		}
+		function temVencedorColunas(simbolo){
+			var resultado=false;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(temVencedorColuna(simbolo,i))
+					resultado=true;
+			return resultado;
+		}
+		function temVencedorColuna(simbolo,index){
+			var resultado=temColuna(simbolo,index);
+			if(resultado)
+				for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+					adicionarClasse(buttoes[i][index],"Vencedor");
+			return resultado;
+		}
+		function temColuna(simbolo,index){
+			var resultado=true;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(!temsimbolo(buttoes[i][index],simbolo))
+					resultado=false;
+			return resultado;
+		}
+		function temVencedorDiagonal(simbolo){
+			var resultado=(
+				temVencedorDiagonalComecandoTopoDireita(simbolo)
+				||
+				temVencedorDiagonalComecandoTopoEsquerda(simbolo)
+			);
+			return resultado;
+		}
+		function temVencedorDiagonalComecandoTopoEsquerda(simbolo){
+			var resultado=temDiagonalComecandoTopoEsquerda(simbolo);
+			if(resultado)
+				for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+					buttoes[i][i].className+=" Vencedor"
+			return resultado;	
+		}
+		function temDiagonalComecandoTopoEsquerda(simbolo){
+			var resultado=true;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(!temsimbolo(buttoes[i][i],simbolo))
+					resultado=false;
+			return resultado;			
+		}
+		function temVencedorDiagonalComecandoTopoDireita(simbolo){
+			var resultado=temDiagonalComecandoTopoDireita(simbolo);
+			if(resultado)
+				for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+					buttoes[i][(quantidadeDeLinhasEColunas-1)-i].className+=" Vencedor"
+			return resultado;	
+		}
+		function temDiagonalComecandoTopoDireita(simbolo){
+			var resultado=true;
+			for (var i=0;i<quantidadeDeLinhasEColunas;i++)
+				if(!temsimbolo(buttoes[i][(quantidadeDeLinhasEColunas-1)-i],simbolo))
+					resultado=false;
+			return resultado;
+		}
+		function temsimbolo(elemento,simbolo){
+			return elemento.className.indexOf(("simbolo-"+simbolo))!=-1
+		}
+		function temX(elemento){
+			return temsimbolo(elemento,x);
+		}
+		function temO(elemento){
+			return temsimbolo(elemento,o);
+		}
+		function notsimbolo(elemento){
+			return (
+				!temX(elemento)
+				&&
+				!temO(elemento)
+			)
+		}
+	</script>
+	
+</html>

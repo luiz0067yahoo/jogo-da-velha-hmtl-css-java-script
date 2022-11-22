@@ -1,0 +1,304 @@
+<html>
+	<style>
+		hmtl,body{
+			margin: 0 0 0 0;
+			padding: 0 0 0 0;
+			width:100%;
+			height:100%;	
+		}
+		#main{
+			width:100%;
+			min-height:100%;
+			display:flex;
+			background-color:#333333;
+			flex-wrap: wrap;
+		}
+		.row{
+			align-items: stretch;
+			width:100%!important;
+			display:flex;
+		}
+		.col{
+			align-items: stretch;
+			flex: 1 1 100px;
+			text-decoration:none;
+			padding:3px;
+		}
+		.simbol{
+			width:100%;
+			min-height:100%;	
+		}
+		.simbol-x{
+			background-repeat :no-repeat;
+			background-image :url('data:image/svg+xml,<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" class="svg-inline--fa fa-times fa-w-11" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>');
+			background-position:center center;
+		}
+		.simbol-o{
+			background-repeat :no-repeat;
+			background-image :url('data:image/svg+xml,<svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="circle" class="svg-inline--fa fa-circle fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z"></path></svg>');
+			background-position:center center;
+		}
+		.winner {
+			background-color:green;
+		}
+		.winner-o .simbol-x{
+			background-color:red;
+		}
+		.winner-x .simbol-o{
+			background-color:red;
+		}
+	</style>
+	<body>
+		<div id="main" class=""></div>
+	</body>
+	<script>
+		class server{
+			session={
+				squareLenght:4,
+				clientSimbol:'o',
+				startClient:true,
+				positionSimbols:[],
+				simbols:['o','x'],
+				o:'o',
+				x:'x',
+				simbol:'',
+			};
+			constructor(){
+				for(var i=0;i<this.session.squareLenght;i++){
+					var acc=[];
+					for(var j=0;j<this.session.squareLenght;j++){
+						acc.push("");
+					}
+					this.session.positionSimbols.push(acc);
+				}
+			}
+			getRandomArbitrary(min, max) {
+				return Math.round(Math.random() * (max - min) + min);
+			}
+			otherSimbol(simbol){
+				return (simbol==o)?x:o;
+			}
+			storePositionSimbol(index,simbol){
+				var i=Math.floor((index-1)/squareLenght);
+				var j=(index-1)%squareLenght;
+				return this.session.positionSimbols[i][j]=simbol;
+			}
+			positionEmpty(i,j){
+				var element=this.session.positionSimbols[i][j];
+				return element!=this.session.o && element!=this.session.o
+			}
+			positionEmptyByIndex(index){
+				var i=Math.floor((index-1)/this.session.squareLenght);
+				var j=(index-1)%this.session.squareLenght;
+				return this.positionEmpty(i,j)
+			}
+			positionsEmpty(){
+				var result=[];
+				for (var index=1;index<this.session.squareLenght**2;index++)
+					if(this.positionEmptyByIndex(index))
+						result.push(index);
+				return result;
+			}
+			computerGame(index,simbol){
+				this.storePositionSimbol(index,simbol);
+				this.session.simbol=this.otherSimbol(simbol);
+				var positions=this.positionsEmpty();
+				var position=this.getRandomArbitrary(0, positions.length-1);
+				var index=positions[position];
+				this.storePositionSimbol(index,this.session.simbol);
+				return {index:index,simbol:this.session.simbol}
+			}
+		}
+	</script>
+	<script>
+		const o='o';
+		const x='x';
+		const idDIVSquare="main";
+		const squareLenght=4;
+		const simbols=[o,x];
+		var initialSimbol=o;
+		var currentSimbol=null;
+		var buttons=[];
+		var prefixIdButton="button-";
+		var myServer=new server();
+		function createCol(){
+			var element=document.createElement("div");
+			element.className="col";
+			return element;
+		}
+		function createRow(){
+			var element=document.createElement("div");
+			element.className="row";
+			return element;
+		}
+		function createButton(id){
+			var element=document.createElement("button");
+			element.className="simbol";
+			element.setAttribute("id",id);
+			element.addEventListener("click", writeSimbol,false);
+			return element;
+		}
+		function createGame(){
+			for(i=0;i<squareLenght;i++){
+				var row=createRow();
+				var lineIdButtons=[];
+				for(j=0;j<squareLenght;j++){
+					var index=i*squareLenght+j+1;
+					var id=prefixIdButton+index.toString();
+					var col=createCol();
+					col.append(createButton(id));
+					row.append(col);
+					lineIdButtons.push((id));
+				}
+				buttons.push(lineIdButtons);
+				$(idDIVSquare).append(row);
+				for(j=0;j<squareLenght;j++){
+					buttons[i][j]=$(buttons[i][j]);
+				}
+			}
+		}
+		createGame();
+		function $(id){
+			return document.getElementById(id);
+		}
+		function addClass(element,className){
+			if(element.className.indexOf(className)==-1)
+				element.className+=(" "+className);
+		}
+		function removeClass(element,className){
+			if(element.className.indexOf(className+" ")!=-1)
+				element.className.replace(className+" ","");
+			else if(element.className.indexOf(" "+className)!=-1)
+				element.className.replace(" "+className,"");
+			else if(element.className.indexOf(className)!=-1)
+				element.className.replace(className,"");
+		}
+		function writeSimbol(evt){
+			var element=evt.currentTarget;
+			currentSimbol=(currentSimbol==null)?initialSimbol:currentSimbol;
+			if(isWinner()==null){
+				if(notSimbol(element)){
+					addClass(element,"simbol-"+currentSimbol);
+					var index=element.getAttribute("id").split("-")[1];
+					var move=myServer.computerGame(index,currentSimbol);
+					var id=prefixIdButton+move.index.toString();
+					addClass($(id),"simbol-"+move.simbol);;
+					isWinner();
+				}
+			}
+			
+		}
+		function changeCurrentSimbol(){
+			currentSimbol=(currentSimbol ==o)?x:o;
+		}
+		function isWinner(){
+			var result=null;
+			if(isWinnerSimbol(o))
+				result=o;
+			else if(isWinnerSimbol(x))
+				result=x;
+			return result;
+		}
+		function isWinnerSimbol(simbol){
+			var result = isWinnerLines(simbol) || isWinnerCols(simbol) || isWinnerDiagonal(simbol);
+			if(result)
+				addClass($(idDIVSquare),"winner-"+simbol);
+			return result;
+		}
+		function isWinnerLines(simbol){
+			var result=false;
+			for (var i=0;i<squareLenght;i++)
+				if(isWinnerLine(simbol,i))
+					result=true;
+			return result;
+		}
+		function isWinnerLine(simbol,index){
+			var result=isLine(simbol,index);
+			if(result)
+				for (var i=0;i<squareLenght;i++)
+					addClass(buttons[index][i],"winner");
+			return result;
+		}
+		function isLine(simbol,index){
+			var result=true;
+			for (var i=0;i<squareLenght;i++)
+				if(!isSimbol(buttons[index][i],simbol))
+					result=false;
+			return result;
+		}
+		function isWinnerCols(simbol){
+			var result=false;
+			for (var i=0;i<squareLenght;i++)
+				if(isWinnerCol(simbol,i))
+					result=true;
+			return result;
+		}
+		function isWinnerCol(simbol,index){
+			var result=isCol(simbol,index);
+			if(result)
+				for (var i=0;i<squareLenght;i++)
+					addClass(buttons[i][index],"winner");
+			return result;
+		}
+		function isCol(simbol,index){
+			var result=true;
+			for (var i=0;i<squareLenght;i++)
+				if(!isSimbol(buttons[i][index],simbol))
+					result=false;
+			return result;
+		}
+		function isWinnerDiagonal(simbol){
+			var result=(
+				isDiagonalWinnerStartTopRight(simbol)
+				||
+				isDiagonalWinnerStartTopLeft(simbol)
+			);
+			return result;
+		}
+		function isDiagonalWinnerStartTopLeft(simbol){
+			var result=isDiagonalStartTopLeft(simbol);
+			if(result)
+				for (var i=0;i<squareLenght;i++)
+					buttons[i][i].className+=" winner"
+			return result;	
+		}
+		function isDiagonalStartTopLeft(simbol){
+			var result=true;
+			for (var i=0;i<squareLenght;i++)
+				if(!isSimbol(buttons[i][i],simbol))
+					result=false;
+			return result;			
+		}
+		function isDiagonalWinnerStartTopRight(simbol){
+			var result=isDiagonalStartTopRight(simbol);
+			if(result)
+				for (var i=0;i<squareLenght;i++)
+					buttons[i][(squareLenght-1)-i].className+=" winner"
+			return result;	
+		}
+		function isDiagonalStartTopRight(simbol){
+			var result=true;
+			for (var i=0;i<squareLenght;i++)
+				if(!isSimbol(buttons[i][(squareLenght-1)-i],simbol))
+					result=false;
+			return result;
+		}
+		function isSimbol(element,simbol){
+			return element.className.indexOf(("simbol-"+simbol))!=-1
+		}
+		function isX(element){
+			return isSimbol(element,x);
+		}
+		function isO(element){
+			return isSimbol(element,o);
+		}
+		function notSimbol(element){
+			return (
+				!isX(element)
+				&&
+				!isO(element)
+			)
+		}
+	</script>
+	
+</html>
